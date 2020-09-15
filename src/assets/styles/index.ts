@@ -84,6 +84,12 @@ export const Repositories = styled.div`
     line-height: .4rem;
     padding: 10px 0;
 
+    transition: transform .5s;
+
+    &:hover {
+      transform: translateX(1rem)
+    }
+
     img {
       border-radius: 100%;
       max-width: 60px;

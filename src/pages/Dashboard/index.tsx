@@ -1,55 +1,67 @@
-import React from "react";
+import React, { FormEvent, useState } from "react";
 
 
 import { Title, Form, Repositories } from "./../../assets/styles";
 import Layout from "./../Layout/index";
 import { AiOutlineRight } from "react-icons/ai";
+import api from "../../services/api";
 
+interface Repository {
+  full_name: string,
+  description: string,
+  owner: {
+    login: string,
+    avatar_url: string,
+    url: string,
+  }
+}
 
-const Dashboard: React.FC = () => <Layout>
-  <Title>Explore repositórios no Github.</Title>
+const Dashboard: React.FC = () => {
 
-  <Form>
-    <input placeholder="O que deseja buscar?" />
-    <button>Buscar agora!</button>
-  </Form>
+  const [repositories, setRepositories] = useState<Repository[]>([]);
 
-  <Repositories>
-    <a href="/repositorie">
-      <img src="https://avatars1.githubusercontent.com/u/863357?s=460&u=6677f2c12db7bb0db6d51f3ce097f310f5a5a9bb&v=4" alt="Gabriel Mendonça" />
+  const repositorySearch = async (evt: FormEvent<HTMLFormElement>): Promise<void> => {
+    evt.preventDefault();
 
-      <span>
-        <h2> brunoom1/gostack-typeorm-upload </h2>
-        <p> repositório cheio de bagunça </p>
-      </span>
+    const form = evt.target as HTMLFormElement;
+    const formData = new FormData(form);
 
-      <AiOutlineRight className="icon" />
-    </a>
+    const repository = formData.get('repository');
+    const { status, data } = await api.get<Repository>(`/repos/${repository}`)
 
-    <a href="/repositorie">
-      <img src="https://avatars1.githubusercontent.com/u/863357?s=460&u=6677f2c12db7bb0db6d51f3ce097f310f5a5a9bb&v=4" alt="Gabriel Mendonça" />
+    if (status === 200) {
+      const repos = [...repositories, data];
+      setRepositories(repos);
+    }
 
-      <span>
-        <h2> brunoom1/gostack-typeorm-upload </h2>
-        <p> repositório cheio de bagunça </p>
-      </span>
+    form.reset();
+  }
 
-      <AiOutlineRight className="icon" />
-    </a>
+  return <Layout>
+    <Title>Explore repositórios no Github.</Title>
 
-    <a href="/repositorie">
-      <img src="https://avatars1.githubusercontent.com/u/863357?s=460&u=6677f2c12db7bb0db6d51f3ce097f310f5a5a9bb&v=4" alt="Gabriel Mendonça" />
+    <Form onSubmit={repositorySearch}>
+      <input placeholder="O que deseja buscar?" name="repository" />
+      <button>Buscar agora!</button>
+    </Form>
 
-      <span>
-        <h2> brunoom1/gostack-typeorm-upload </h2>
-        <p> repositório cheio de bagunça </p>
-      </span>
+    <Repositories>
+      {repositories.map((rep: Repository) =>
+        <a href="/repositorie">
+          <img src={rep.owner.avatar_url} alt={rep.owner.login} />
 
-      <AiOutlineRight className="icon" />
-    </a>
-  </Repositories>
+          <span>
+            <h2> {rep.full_name} </h2>
+            <p> {rep.description} </p>
+          </span>
 
-</Layout>;
+          <AiOutlineRight className="icon" />
+        </a>
+      )}
 
+    </Repositories>
+
+  </Layout>;
+}
 
 export default Dashboard;
