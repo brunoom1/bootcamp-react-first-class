@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useState, useEffect } from "react";
 
 
 import { Title, Form, Repositories, Error } from "./../../assets/styles";
@@ -17,8 +17,22 @@ interface Repository {
 }
 
 const Dashboard: React.FC = () => {
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [repositories, setRepositories] = useState<Repository[]>(() => {
+
+    const repString = localStorage.getItem("com.gmdevelop.repositories") || '';
+    const localRepositories = JSON.parse(repString);
+
+    if (localRepositories) {
+      return localRepositories;
+    } else {
+      return [];
+    }
+  });
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    localStorage.setItem("com.gmdevelop.repositories", JSON.stringify(repositories));
+  }, [repositories]);
 
   const repositorySearch = async (evt: FormEvent<HTMLFormElement>): Promise<void> => {
     evt.preventDefault();
