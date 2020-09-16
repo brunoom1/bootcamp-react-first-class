@@ -1,7 +1,7 @@
 import React, { FormEvent, useState } from "react";
 
 
-import { Title, Form, Repositories } from "./../../assets/styles";
+import { Title, Form, Repositories, Error } from "./../../assets/styles";
 import Layout from "./../Layout/index";
 import { AiOutlineRight } from "react-icons/ai";
 import api from "../../services/api";
@@ -17,8 +17,8 @@ interface Repository {
 }
 
 const Dashboard: React.FC = () => {
-
   const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [error, setError] = useState<string>("");
 
   const repositorySearch = async (evt: FormEvent<HTMLFormElement>): Promise<void> => {
     evt.preventDefault();
@@ -27,11 +27,23 @@ const Dashboard: React.FC = () => {
     const formData = new FormData(form);
 
     const repository = formData.get('repository');
-    const { status, data } = await api.get<Repository>(`/repos/${repository}`)
 
-    if (status === 200) {
-      const repos = [...repositories, data];
-      setRepositories(repos);
+    if (!repository) {
+      setError("Digite o repositório que deseja buscar no formato nome/repo");
+      return;
+    }
+
+    try {
+      const { status, data } = await api.get<Repository>(`/repos/${repository}`)
+
+      if (status === 200) {
+        const repos = [...repositories, data];
+
+        setRepositories(repos);
+        setError("");
+      }
+    } catch {
+      setError("Houve um erro na sua busca");
     }
 
     form.reset();
@@ -40,10 +52,12 @@ const Dashboard: React.FC = () => {
   return <Layout>
     <Title>Explore repositórios no Github.</Title>
 
-    <Form onSubmit={repositorySearch}>
+    <Form hasError={!!error} onSubmit={repositorySearch}>
       <input placeholder="O que deseja buscar?" name="repository" />
       <button>Buscar agora!</button>
     </Form>
+
+    {error && <Error> {error} </Error>}
 
     <Repositories>
       {repositories.map((rep: Repository) =>

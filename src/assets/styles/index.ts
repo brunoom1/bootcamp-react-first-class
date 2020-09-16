@@ -1,8 +1,16 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import githubLogo from "./../images/github-logo.svg";
 import { shade, lighten, invert } from "polished";
 
 import { getTheme } from "./themes-color";
+
+const theme = getTheme();
+
+export const Error = styled.span`
+  display: block;
+  padding: 5px 0;
+  color: ${theme.errorColor};
+`;
 
 export const Title = styled.h1`
   font-size: 2rem;
@@ -23,7 +31,11 @@ export const PageContainerWithBackgroundLogo = styled(PageContainer)`
   background-repeat: no-repeat;
 `;
 
-export const Form = styled.form`
+interface CustomForm {
+  hasError: boolean;
+}
+
+export const Form = styled.form<CustomForm>`
   margin-top: 40px;
   max-width: 700px;
 
@@ -33,34 +45,39 @@ export const Form = styled.form`
     flex: 1;
     height: 70px;
     padding: 0 24px;
-    border: 0;
     border-radius: 5px 0 0 5px;
-    color: ${getTheme().primaryTextColor};
-    background-color: ${getTheme().secondaryTextColor};
+    color: ${theme.primaryTextColor};
+    background-color: ${theme.secondaryTextColor};
+    border: solid 2px ${theme.secondaryTextColor};
+
+    ${(props) => props.hasError && css`
+      border-color: ${theme.errorColor};
+    `}
+
+    border-right: 0;
+
 
     &::placeholder {
-      color: ${lighten(.6, invert(getTheme().secondaryTextColor))};
+      color: ${lighten(.6, invert(theme.secondaryTextColor))};
     }
   }
 
   button {
     width: 210px;
     height: 70px;
-    background-color: ${getTheme().primaryColor};
+    background-color: ${theme.primaryColor};
     border-radius: 0 5px 5px 0;
     border: 0;
-    color: ${getTheme().secondaryTextColor};
+    color: ${theme.secondaryTextColor};
     font-weight: bold;
     transition: background-color .2s;
 
     &:hover {
-      background-color: ${shade(0.2, getTheme().primaryColor)}
+      background-color: ${shade(0.2, theme.primaryColor)}
     }
   }
   
 `;
-
-const theme = getTheme();
 
 export const Repositories = styled.div`
   margin-top: 70px;
